@@ -42,7 +42,7 @@ Access API docs at http://localhost:8000/docs
 API Endpoint 🔍
 GET /api/classify-number?number={integer}
 
-Successful Response (200 OK)
+ Successful Response (200 OK)
 
 {
     "number": 371,
