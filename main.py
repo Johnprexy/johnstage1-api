@@ -78,16 +78,20 @@ async def classify_number(number: str = Query(...)):
     
     digit_sum_result = digit_sum(n)
     
-    # Fetch fun fact from Numbers API
+    # Custom fun fact for Armstrong numbers
     fun_fact = "No fun fact available."
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(f"http://numbersapi.com/{n}/math?json")
-            if response.status_code == 200:
-                data = response.json()
-                fun_fact = data.get("text", fun_fact)
-    except Exception as e:
-        pass  # Keep default fun fact message
+    
+    if armstrong:
+        fun_fact = f"{n} is an Armstrong number because " + " + ".join([f"{d}^{len(str(n))}" for d in str(n)]) + f" = {n}"
+    else:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                response = await client.get(f"http://numbersapi.com/{n}/math?json")
+                if response.status_code == 200:
+                    data = response.json()
+                    fun_fact = data.get("text", fun_fact)
+        except Exception as e:
+            pass  # Keep default fun fact message
     
     return {
         "number": n,
@@ -97,6 +101,7 @@ async def classify_number(number: str = Query(...)):
         "digit_sum": digit_sum_result,
         "fun_fact": fun_fact
     }
+
 
 if __name__ == "__main__":
     import uvicorn
