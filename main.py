@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import httpx
 import math
+import re
 
 app = FastAPI()
 
@@ -56,13 +57,15 @@ def digit_sum(n: int) -> int:
 
 @app.get("/api/classify-number")
 async def classify_number(number: str = Query(...)):
-    # Validate input is an integer
-    if not number.lstrip('-').isdigit():
+    # Strip whitespace and validate integer format
+    stripped_num = number.strip()
+    if not re.fullmatch(r"-?\d+", stripped_num):
         return JSONResponse(
             status_code=400,
             content={"number": number, "error": True}
         )
-    n = int(number)
+    
+    n = int(stripped_num)
     
     # Determine properties
     armstrong = is_armstrong(n)
@@ -87,7 +90,7 @@ async def classify_number(number: str = Query(...)):
                 data = response.json()
                 fun_fact = data.get("text", fun_fact)
     except Exception as e:
-        pass  # Keep default fun fact message if API fails
+        pass  # Keep default fun fact message
     
     return {
         "number": n,
@@ -98,12 +101,6 @@ async def classify_number(number: str = Query(...)):
         "fun_fact": fun_fact
     }
 
-
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-@app.get("/")
-async def root():
-    return {"message": "API is running"}
